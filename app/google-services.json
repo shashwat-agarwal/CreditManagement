@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "190124368677",
+    "firebase_url": "https://credit-management-8c786.firebaseio.com",
+    "project_id": "credit-management-8c786",
+    "storage_bucket": "credit-management-8c786.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190124368677:android:50eca480f63f40dc56b0cc",
+        "android_client_info": {
+          "package_name": "com.example.creditmanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "190124368677-eg283lj6jgam1frs11b6pd9p2t4r248p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrm30jORtEEiJ1Mbd6jIl4vs972X3GhEg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "190124368677-eg283lj6jgam1frs11b6pd9p2t4r248p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

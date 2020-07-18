@@ -10,11 +10,16 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class detailsActivity extends AppCompatActivity {
 
@@ -24,13 +29,14 @@ public class detailsActivity extends AppCompatActivity {
     String address;
     int credit;
     long maxid=0;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference userRef = db.collection("user");
 
-    private DatabaseReference databaseReference;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        databaseReference= FirebaseDatabase.getInstance().getReference().child("Members");
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -60,27 +66,26 @@ public class detailsActivity extends AppCompatActivity {
             credit=Integer.parseInt(creditE.getText().toString().trim());
 
             if (TextUtils.isEmpty(name) && TextUtils.isEmpty(email)){
-                Toast.makeText(this, "Enter name and email", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Enter name and email", Toast.LENGTH_LONG).show();
             }
             else {
 
-                databaseReference.addValueEventListener(new ValueEventListener() {
+
+                UserInformation userinformation=new UserInformation(name,address,email,credit);
+
+                userRef.add(userinformation).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists())
-                            maxid=(dataSnapshot.getChildrenCount());
+                    public void onSuccess(DocumentReference documentReference) {
+                        Toast.makeText(getApplicationContext(), "Information Saved...", Toast.LENGTH_SHORT).show();
                     }
-
+                }).addOnFailureListener(new OnFailureListener() {
                     @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(detailsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
-                UserInformation userinformation=new UserInformation(name,address,email,credit);
-                databaseReference.child(String.valueOf(maxid+1)).setValue(userinformation);
-                // databaseReference.child("").setValue(userinformation);
-                 databaseReference.push();
-                Toast.makeText(this, "Information Saved...", Toast.LENGTH_SHORT).show();
+
+
                 finish();
             }
             return true;

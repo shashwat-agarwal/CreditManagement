@@ -5,6 +5,12 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -12,8 +18,13 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+  TextView textViewData;
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference userRef = db.collection("user");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        textViewData=findViewById(R.id.textHelloWorld);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -51,5 +63,31 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        userRef.addSnapshotListener( this, new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+                String data = "";
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                    UserInformation userInformation = documentSnapshot.toObject(UserInformation.class);
+
+                    String name = userInformation.getName();
+                    String email = userInformation.getEmail();
+                    String address = userInformation.getAddress();
+                    int credit = userInformation.getCredit();
+                    data += "Name: " + name
+                            + "\nAddress: " + address + "\nEmail: " + email + "\nCredit: " + credit + "\n\n";
+                }
+
+                textViewData.setText(data);
+            }
+        });
     }
 }

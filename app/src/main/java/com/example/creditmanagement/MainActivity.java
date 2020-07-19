@@ -85,7 +85,11 @@ public class MainActivity extends AppCompatActivity  {
             public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
                 UserInformation userInformation=documentSnapshot.toObject(UserInformation.class);
                 String path=documentSnapshot.getReference().getPath();
-                Toast.makeText(MainActivity.this, "id: "+documentSnapshot.getId(), Toast.LENGTH_SHORT).show();
+                String id=documentSnapshot.getId();
+                Toast.makeText(MainActivity.this, "id: "+id+" path "+path, Toast.LENGTH_SHORT).show();
+                Intent intent= new Intent(getApplicationContext(),TransactionActivity.class);
+                intent.putExtra("id",id);
+                startActivity(intent);
             }
         });
     }

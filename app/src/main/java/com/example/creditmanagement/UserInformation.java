@@ -21,8 +21,9 @@ public class UserInformation {
     }
 
 
-
-
+    public void setCredit(int credit) {
+        this.credit = credit;
+    }
 
     public String getEmail() {
         return email;

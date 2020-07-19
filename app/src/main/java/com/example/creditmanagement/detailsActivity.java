@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -17,14 +18,14 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.valueOf;
+
 public class detailsActivity extends AppCompatActivity {
 
-    EditText nameE,emailE,addressE,creditE;
-    String  name;
-    String email;
-    String address;
-    int credit;
-    long maxid=0;
+    private EditText nameE, emailE, addressE, creditE;
+
+
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference userRef = db.collection("user");
 
@@ -34,6 +35,7 @@ public class detailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -43,50 +45,52 @@ public class detailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        switch (item.getItemId()) {
+            case R.id.done:
+                done();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.done) {
-            nameE =findViewById(R.id.name);
-            addressE=findViewById(R.id.address);
-            emailE=findViewById(R.id.email);
-            creditE=findViewById(R.id.credit);
-
-
-            name=nameE.getText().toString().trim();
-            email=emailE.getText().toString().trim();
-            address=addressE.getText().toString().trim();
-            credit=Integer.parseInt(creditE.getText().toString().trim());
-
-            if (TextUtils.isEmpty(name) && TextUtils.isEmpty(email)){
-                Toast.makeText(this, "Enter name and email", Toast.LENGTH_LONG).show();
-            }
-            else {
+    private void done() {
+        nameE = findViewById(R.id.name);
+        addressE = findViewById(R.id.address);
+        emailE = findViewById(R.id.email);
+        creditE = findViewById(R.id.credit);
 
 
-                UserInformation userinformation=new UserInformation(name,address,email,credit);
+        String name = nameE.getText().toString().trim();
+        String email = emailE.getText().toString().trim();
+        String address = addressE.getText().toString().trim();
+        int credit = parseInt(creditE.getText().toString().trim());
 
-                userRef.add(userinformation).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Toast.makeText(getApplicationContext(), "Information Saved...", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(detailsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
-                finish();
-            }
-            return true;
+        if (name.isEmpty() || email.isEmpty()) {
+            Log.i("ERROR", "CHECK ONCE");
+            Toast.makeText(this, "Enter name and email", Toast.LENGTH_LONG).show();
+            return;
         }
 
-        return super.onOptionsItemSelected(item);
+
+        if (creditE.getText().toString().isEmpty()) credit = 0;
+        if (address.isEmpty()) address = "Not specified by User";
+
+        UserInformation userinformation = new UserInformation(name, address, email, credit);
+
+        userRef.add(userinformation).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                Toast.makeText(getApplicationContext(), "Information Saved...", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(detailsActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        finish();
+
     }
 }

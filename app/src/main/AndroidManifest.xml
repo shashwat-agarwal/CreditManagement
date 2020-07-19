@@ -11,8 +11,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TransactionActivity"
+        <activity android:name=".TransactionHistoryActivity"
             android:parentActivityName=".MainActivity"/>
+        <activity
+            android:name=".TransactionActivity"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".detailsActivity"
             android:parentActivityName=".MainActivity" />

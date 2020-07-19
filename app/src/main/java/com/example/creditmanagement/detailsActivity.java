@@ -64,7 +64,7 @@ public class detailsActivity extends AppCompatActivity {
         String name = nameE.getText().toString().trim();
         String email = emailE.getText().toString().trim();
         String address = addressE.getText().toString().trim();
-        int credit = parseInt(creditE.getText().toString().trim());
+        int credit = parseInt(creditE.getText().toString());
 
         if (name.isEmpty() || email.isEmpty()) {
             Log.i("ERROR", "CHECK ONCE");

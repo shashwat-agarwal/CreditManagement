@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,17 +28,21 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class TransactionActivity extends AppCompatActivity {
 
     TextView displayDetails;
-    private String id, str;
+    private String id, str, sender_name;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference userRef = db.collection("user");
+    private CollectionReference transactionRef = db.collection("transactions");
+
     Spinner spinner;
-    private int amount,senderCredit;
+    private int amount, senderCredit;//amount is the credits transferred
 
     public void transact(View view) {
         EditText amt = findViewById(R.id.editTextAmount);
@@ -45,15 +50,18 @@ public class TransactionActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter valid amount", Toast.LENGTH_SHORT).show();
         } else {
             amount = Integer.parseInt(amt.getText().toString());
-            if (senderCredit< amount)
+            if (senderCredit < amount)
                 Toast.makeText(this, "Insufficient Balance !", Toast.LENGTH_SHORT).show();
-            else{
-                senderCredit-=amount;
-            transactionUpdate(str);
-            finish();}
+            else {
+                senderCredit -= amount;
+                transactionUpdate(str);
+                transactionHistory();
+                finish();
+            }
         }
 
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,22 +70,22 @@ public class TransactionActivity extends AppCompatActivity {
         displayDetails = findViewById(R.id.textview_display);
         spinner = findViewById(R.id.spinner);
 
-            Intent intent = getIntent();
-            id = intent.getStringExtra("id");
-            load();
-            addInSpinner();
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    str = adapterView.getSelectedItem().toString();
-                }
+        Intent intent = getIntent();
+        id = intent.getStringExtra("id");
+        load();
+        addInSpinner();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                str = adapterView.getSelectedItem().toString();
+            }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
 
-                }
-            });
-        }
+            }
+        });
+    }
 
 
     private void transactionUpdate(String str) {
@@ -87,7 +95,7 @@ public class TransactionActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if (documentSnapshot.exists()) {
-                            documentSnapshot.getReference().update("credit",senderCredit);
+                            documentSnapshot.getReference().update("credit", senderCredit);
                         } else {
                             Toast.makeText(TransactionActivity.this, "Document does not exist", Toast.LENGTH_SHORT).show();
                         }
@@ -102,15 +110,14 @@ public class TransactionActivity extends AppCompatActivity {
                 });
 
 
-
         userRef.whereEqualTo("name", str).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for (QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
-                    UserInformation userInformation=documentSnapshot.toObject(UserInformation.class);
-                    int creditRecepient=userInformation.getCredit();
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                    UserInformation userInformation = documentSnapshot.toObject(UserInformation.class);
+                    int creditRecepient = userInformation.getCredit();
 
-                    documentSnapshot.getReference().update("credit",creditRecepient+amount);
+                    documentSnapshot.getReference().update("credit", creditRecepient + amount);
                     Toast.makeText(TransactionActivity.this, "Transaction Successful", Toast.LENGTH_SHORT).show();
 
                 }
@@ -158,7 +165,9 @@ public class TransactionActivity extends AppCompatActivity {
                             String address = userInformation.getAddress();
                             String email = userInformation.getEmail();
                             int credit = userInformation.getCredit();
-                            senderCredit=credit;
+
+                            sender_name = name;
+                            senderCredit = credit;
                             displayDetails.setText("Name:  " + name + "\n" + "Email:  " + email + "\n" + "Address: " + address + "\n" + "Credit: " + credit);
                         } else {
                             Toast.makeText(TransactionActivity.this, "Document does not exist", Toast.LENGTH_SHORT).show();
@@ -193,5 +202,18 @@ public class TransactionActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void transactionHistory() {
+        Calendar calendar = Calendar.getInstance();
+        String currDate = DateFormat.getDateInstance().format(calendar.getTime());
+        TransactionHistory history = new TransactionHistory(sender_name, str, "" + amount, currDate);
+        transactionRef.add(history)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                       Log.i("error",e.toString());
+                    }
+                });
     }
 }

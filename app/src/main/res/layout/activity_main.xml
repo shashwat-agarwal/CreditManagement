@@ -29,7 +29,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="#ffffff"
-        app:backgroundTint="#310233"
+        app:backgroundTint="#293302"
         app:borderWidth="0sp"
         app:maxImageSize="58sp"
         app:srcCompat="@drawable/ic_add" />
